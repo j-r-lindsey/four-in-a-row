@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="remodal/jquery.remodal.css">
+
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+
+    <title>Game Client Test</title>
+</head>
+<body>
+    <center>
+        <form class="pure-form">
+    <table cellpadding="10">
+        <tr>
+            <td><input type="text" id="playername" placeholder="Player Name"/></td>
+            <td><input type="button" value="Enter" id="btnplayer" class="pure-button pure-button-primary"/></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+
+                <table id="opponents" style="visibility:hidden" class="pure-table pure-table-horizontal" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Choose an Opponent</th>
+                    </tr>
+                    </thead>
+
+                    <tbody style="overflow: auto; height: 100px;">
+
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+            </form>
+
+        <div class="remodal" data-remodal-id="modalWaiting">
+            <h1>Four-In-A-Row</h1>
+            <p>
+                Awaiting Response from Opponent:
+
+                <h2 id="opp"></h2>
+            </p>
+            <br>
+            <!--
+                <a class="remodal-cancel" href="#">Cancel</a>
+                <a class="remodal-confirm" href="#">OK</a>
+            -->
+        </div>
+
+        <div class="remodal" data-remodal-id="modalInvite">
+            <h1>Four-In-A-Row</h1>
+            <p>
+                You received an invite from:
+
+            <h2 id="invite-sender"></h2>
+            </p>
+            <br>
+                <a id="acceptInvite" class="remodal-cancel" href="#">Accept</a>
+                <a id="rejectInvite" class="remodal-confirm" href="#">Reject</a>
+        </div>
+
+        <div class="remodal" data-remodal-id="modalWaiting">
+            <h1>Four-In-A-Row</h1>
+            <p>
+                Awaiting Response from Opponent:
+
+            <h2 id="opp"></h2>
+            </p>
+            <br>
+            <!--
+                <a class="remodal-cancel" href="#">Cancel</a>
+                <a class="remodal-confirm" href="#">OK</a>
+            -->
+        </div>
+
+        <div class="remodal" data-remodal-id="modalGame">
+            <h1>Four-In-A-Row</h1>
+            <table>
+                <tr>
+                    <td><input type="button" value="Enter" id="col1" class="pure-button pure-button-primary"/></td>
+                    <td><input type="button" value="Enter" id="col2" class="pure-button pure-button-primary"/></td>
+                    <td><input type="button" value="Enter" id="col3" class="pure-button pure-button-primary"/></td>
+                    <td><input type="button" value="Enter" id="col4" class="pure-button pure-button-primary"/></td>
+                </tr>
+            </table>
+        </div>
+    <script>
+
+        //get socket connections and send name
+        var socket = io("/"); //not url, actually socket.io namespace path - could have multiple separate connections
+
+        var opponentListSelectionHandler = function(opp) {
+            $("#opp").html(opp);
+            var pname = $("#playername").val();
+            socket.emit('players',JSON.stringify({invite: {to: opp, from: pname}}));
+            document.location.href='#modalWaiting';
+
+            //set socket call back for game updates
+            //this should move to where a unique channel can be launched
+            //socket.on('game',gameUpdateHandler);
+        };
+
+        var opponentListUpdateHandler = function(msg) {
+            //update list of available opponents, or prompt with invite
+            var json = JSON.parse(msg);
+            if (json.error)
+                console.log(json.error);
+            else if (json.invite) {
+                $("#invite-sender").html(json.invite.from);
+                document.location.href='#modalInvite';
+                socket.on('game',gameUpdateHandler);
+            } else if (json.availablePlayers) {
+                var options = "";
+                $.each(json.availablePlayers,function(index,value){
+                    options += "<tr style='cursor:pointer'><td>" + value + "</td></tr>";
+                });
+                $("#opponents tbody").html(options);
+                $('#opponents tbody tr').click( function() {
+                    opponentListSelectionHandler(json.availablePlayers[$(this).index()]);
+                });
+            }
+        };
+
+        var gameUpdateHandler = function(msg) {
+            //show opposing player's moves
+
+            document.location.href='#modalGame';
+
+        };
+
+
+        $("#btnplayer").click(function(evt) {
+
+            var pname = $("#playername").val();
+
+            //set socket call back for player updates
+            $("#opponents").css( {"visibility":"visible"});
+            socket.on('players',opponentListUpdateHandler);
+            socket.emit('players',JSON.stringify({playerName: pname}));
+
+        });
+
+        $("#acceptInvite").click(function(evt) {
+
+            var pname = $("#playername").val();
+            var opp = $("#invite-sender").html();
+            socket.on('game',gameUpdateHandler);
+            socket.emit('game',JSON.stringify({game: {player1: pname, player2: opp}}));
+
+        });
+
+        $("#rejectInvite").click(function(evt) {
+            //$("#opponents").css( {"visibility":"hidden"});
+            //todo cancel invite
+        });
+
+        $("#col1").click(function(evt) {
+
+        });
+
+    </script>
+    <script src="remodal/jquery.remodal.min.js"></script>
+
+    </center>
+</body>
+</html>
