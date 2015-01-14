@@ -82,8 +82,6 @@ exports.getWinner = function() {
         }
     }
 
-    console.log(grid);
-
     return 0;
 }
 
