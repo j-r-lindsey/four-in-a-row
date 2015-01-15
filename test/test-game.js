@@ -55,7 +55,7 @@ describe('Downward right diagonal win check', function () {
     });
 });
 
-describe('Downward right diagonal win check', function () {
+describe('Downward left diagonal win check', function () {
     it('Player 1 (red) wins diagonally.', function (done) {
         engine.reset();
 
