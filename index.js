@@ -1,16 +1,15 @@
 function setupRoutes() {
-    app.get("/", function(req,res) {
-        res.end("nothing to see here");
-    });
+//    app.get("/", function(req,res) {
+//        res.end("foo");
+//    });
 
     app.use(express.static(__dirname));
 }
 
 function handleSocket(socket) {
-    socket.on("disconnect",function() {
-        console.log("client disconnected.");
-        //clearInterval(intv);
-    });
+//    socket.on("disconnect",function() {
+//        //kill game?
+//    });
 
     socket.on("players",function(msg) {
         var json = JSON.parse(msg);
@@ -29,19 +28,17 @@ function handleSocket(socket) {
     });
 }
 
-var
-    express = require("express"),
-    app = express(),
-	http = require("http"),
-	httpserv = http.createServer(app),
+var express = require("express");
+var app = express();
+var http = require("http");
+var httpserv = http.createServer(app);
 
-    io = require("socket.io")(httpserv),
+var io = require("socket.io")(httpserv);
 
-	port = 8006,
-	host = "127.0.0.1",
+var port = 8006;
+var host = "127.0.0.1";
 
-    availablePlayers = []
-;
+var availablePlayers = [];
 
 setupRoutes();
 httpserv.listen(port, host);
