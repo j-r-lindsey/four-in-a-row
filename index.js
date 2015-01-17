@@ -2,6 +2,11 @@ function setupRoutes() {
 //    app.get("/", function(req,res) {
 //        res.end("foo");
 //    });
+//
+//    app.put("/move");
+//    app.put("/game");
+//    app.put("/invite");
+//
 
     app.use(express.static(__dirname));
 }
@@ -25,6 +30,9 @@ function handleSocket(socket) {
 
     socket.on("game",function(msg){
         io.emit("game","new game: " + msg);
+
+        //game[player1+_vs_player2 or uuid] = engine.createInstance();
+        //send "your turn" message
     });
 }
 

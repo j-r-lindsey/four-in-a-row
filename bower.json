@@ -1,0 +1,25 @@
+{
+  "name": "four-in-a-row",
+  "main": "index.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/j-r-lindsey/four-in-a-row",
+  "authors": [
+    "j-r-lindsey"
+  ],
+  "description": "Connect4 clone, just for playing with websockets.",
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "remodal": "~0.4.1"
+  }
+}
