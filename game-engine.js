@@ -12,6 +12,10 @@ var GameEngine = function() {
     var RED = 1;
     var BLACK = 2;
 
+    this.getGrid = function() {
+        return grid.slice();
+    }
+
     this.makeMove = function(player,column) {
         var row = grid.length-1;
         while (row >= 0 && grid[row][column] != 0) {

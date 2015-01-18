@@ -6,6 +6,7 @@
 
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/game-client.js"></script>
 
 
     <title>Game Client Test</title>
@@ -80,22 +81,32 @@
 
         <div class="remodal" data-remodal-id="modalGame">
             <h1>Four-In-A-Row</h1>
-            <table>
-                <tr>
-                    <td><input type="button" value="Enter" id="col1" class="pure-button pure-button-primary"/></td>
-                    <td><input type="button" value="Enter" id="col2" class="pure-button pure-button-primary"/></td>
-                    <td><input type="button" value="Enter" id="col3" class="pure-button pure-button-primary"/></td>
-                    <td><input type="button" value="Enter" id="col4" class="pure-button pure-button-primary"/></td>
-                </tr>
-            </table>
+            <div id="gameboard" align="center"></div>
         </div>
     <script>
 
         //get socket connections and send name
         var socket = io("/"); //not url, actually socket.io namespace path - could have multiple separate connections
 
+        var player = 0;
+
+        var opponent = "";
+
+        var gameClient = new GameClient("gameboard");
+
+        function move(col) {
+            socket.emit('game',JSON.stringify({
+                move: {
+                    player: $("#playername").val(),
+                    opponent: opponent,
+                    column: col
+                }
+            }))
+        }
+
         var opponentListSelectionHandler = function(opp) {
             $("#opp").html(opp);
+            opponent = opp;
             var pname = $("#playername").val();
             socket.emit('players',JSON.stringify({invite: {to: opp, from: pname}}));
             document.location.href='#modalWaiting';
@@ -129,7 +140,17 @@
         var gameUpdateHandler = function(msg) {
             //show opposing player's moves
 
-            document.location.href='#modalGame';
+            var json = JSON.parse(msg);
+            if (json.start) {
+                player = ($("#playername").val() == json.start.player1) ? 1:2;
+                document.location.href='#modalGame';
+                gameClient.render(player,json.grid);
+            } else if (json.move) {
+                gameClient.render(player,json.grid);
+            } else if (json.winner) {
+                gameClient.render(player,json.grid);
+                alert(json.winner + " won!");
+            }
 
         };
 
@@ -149,8 +170,9 @@
 
             var pname = $("#playername").val();
             var opp = $("#invite-sender").html();
+            opponent = opp;
             socket.on('game',gameUpdateHandler);
-            socket.emit('game',JSON.stringify({game: {player1: pname, player2: opp}}));
+            socket.emit('game',JSON.stringify({start: {player1: pname, player2: opp}}));
 
         });
 
@@ -159,9 +181,6 @@
             //todo cancel invite
         });
 
-        $("#col1").click(function(evt) {
-
-        });
 
     </script>
     <script src="bower_components/remodal/dist/jquery.remodal.min.js"></script>

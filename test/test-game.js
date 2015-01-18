@@ -1,6 +1,6 @@
 'use strict';
 
-var game = require("../game.js");
+var game = require("../game-engine.js");
 var engine = game.createInstance();
 
 describe('Horizontal win check', function () {
