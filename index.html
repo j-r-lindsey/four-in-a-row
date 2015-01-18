@@ -108,12 +108,9 @@
             $("#opp").html(opp);
             opponent = opp;
             var pname = $("#playername").val();
+            socket.on('game',gameUpdateHandler);
             socket.emit('players',JSON.stringify({invite: {to: opp, from: pname}}));
             document.location.href='#modalWaiting';
-
-            //set socket call back for game updates
-            //this should move to where a unique channel can be launched
-            //socket.on('game',gameUpdateHandler);
         };
 
         var opponentListUpdateHandler = function(msg) {
@@ -150,6 +147,8 @@
             } else if (json.winner) {
                 gameClient.render(player,json.grid);
                 alert(json.winner + " won!");
+            } else if (json.turn) {
+                gameClient.render(player,json.grid);
             }
 
         };

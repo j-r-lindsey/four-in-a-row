@@ -48,18 +48,25 @@ function handleSocket(socket) {
         else if (json.move) {
             var player = json.move.player;
             var opponent = json.move.opponent;
-
-            //TODO: need to include which is which 0 or 1
             var gameId = buildGameId(player,opponent);
-
             var g = gameMap[gameId];
+
+            //TODO: hack - fix request or spawn new game channels
+            if (g==null) {
+                gameId = buildGameId(opponent,player);
+                g = gameMap[gameId];
+            }
+
             var playerNum = (g.players[0] == player) ? 1:2;
             g.makeMove(playerNum,json.move.column);
             var winner = g.getWinner();
             if (winner > 0) {
                 io.emit("game",JSON.stringify({grid: g.getGrid(), winner: g.players[winner-1]}));
             } else {
-                io.emit("game",JSON.stringify({grid: g.getGrid(), turn: opponent}));
+                io.emit("game",JSON.stringify({
+                    grid: g.getGrid(),
+                    turn: g.players[(playerNum-1)]
+                }));
             }
         }
     });
@@ -73,7 +80,7 @@ var httpserv = http.createServer(app);
 var io = require("socket.io")(httpserv);
 
 var port = 8006;
-var host = "127.0.0.1";
+var host = "192.168.1.8";
 
 var availablePlayers = [];
 var gameMap = {};
